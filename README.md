@@ -6,7 +6,7 @@ A production-ready **Angular 19 Enterprise Template** with SSR and hydration, Ma
 - Angular 19.2+ (Standalone Components)
 - Angular Material + Responsive Design
 - SCSS with modular architecture
-- Server-Side Rendering (SSR) & Static Site Generation (SSG)
+- ~~Server-Side Rendering (SSR) & Static Site Generation (SSG)~~
 - Runtime Configuration & Environment Management
 - Signals-based State Management
 - Reactive Forms with Validation
@@ -493,5 +493,6 @@ npm run watch          # Watch mode build
 Open source template for enterprise Angular applications.
 
 ---
+
 
 **Happy coding! 🚀**
