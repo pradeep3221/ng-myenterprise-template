@@ -165,9 +165,23 @@ get<T>(url: string): Observable<T> {
   );
 }
 
-🚀 Bonus Setup
+## 🚀 Bonus Setup
 * Add TailwindCSS (npx tailwindcss init -p)
 * Configure Prettier + ESLint
 * Add Husky pre-commit hook for lint + test
 * Add Storybook setup for shared components
 * Add environment switcher in navbar for debugging
+
+## Potential Next Enhancements (optional):
+
+Advanced State: Add @ngrx/signals or similar for complex state
+Form Validation: Shared form validation utilities
+E2E Testing: Cypress or Playwright setup
+CI/CD: GitHub Actions pipeline
+Performance: Bundle budget optimization, lazy image loading
+A11y: Accessibility audit & improvements
+i18n: Internationalization setup
+Database Integration: Example service for Postgres/MongoDB
+Real Mock API: Implement actual mock responses (e.g., json-server)
+Storybook: Component library documentation
+Swagger Integration: Auto-generated API docs

@@ -4,6 +4,6 @@
     #{{o.number}} - ${{o.total}}
     <a [routerLink]="['/orders', o.id]">View</a>
   </li>
-  <li *ngIf="!orders?.length">No orders yet.</li>
+  <li *ngIf="!orders.length">No orders yet.</li>
   
 </ul>

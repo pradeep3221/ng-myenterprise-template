@@ -1,2 +1,16 @@
-/* Global styles entry: imports partials from /src/styles */
+/* Global styles entry: imports partials and Material prebuilt theme */
 @use './styles/index.scss' as *;
+
+// Use lighter Material theme for faster LCP
+// Indigo-Pink is the smallest Material prebuilt theme (~95kB gzipped)
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+body {
+	margin: 0;
+	font-family: system-ui, Inter, Roboto, Arial, sans-serif;
+	background: var(--app-bg, #fafafa);
+	color: var(--app-fg, #222);
+	// Enable GPU acceleration for smooth animations
+	will-change: auto;
+}
+

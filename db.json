@@ -1,0 +1,39 @@
+{
+  "orders": [
+    {
+      "id": 1,
+      "name": "Order #001",
+      "status": "completed",
+      "total": 199.99,
+      "createdAt": "2025-11-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Order #002",
+      "status": "processing",
+      "total": 299.99,
+      "createdAt": "2025-11-05T14:30:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Order #003",
+      "status": "pending",
+      "total": 149.99,
+      "createdAt": "2025-11-08T09:15:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Order #004",
+      "status": "completed",
+      "total": 89.99,
+      "createdAt": "2025-11-02T16:45:00Z"
+    },
+    {
+      "id": 5,
+      "name": "Order #005",
+      "status": "pending",
+      "total": 349.99,
+      "createdAt": "2025-11-09T11:20:00Z"
+    }
+  ]
+}

@@ -5,9 +5,126 @@
   <title>NgMyenterpriseTemplate</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Enterprise Angular 19 template with SSR, Material Design, and performance optimizations">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- Load fonts without blocking render -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style">
+  
+  <!-- Critical CSS inline - minimal paint for FCP/LCP -->
+  <style>
+    /* Import Roboto with swap display - text appears immediately */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    
+    /* Reset & Base */
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: Roboto, system-ui, Arial, sans-serif; 
+      background: #fafafa; 
+      color: #222; 
+    }
+    
+    /* App root container */
+    app-root { 
+      display: block;
+      min-height: 100vh;
+    }
+    
+    /* Material Sidenav Container */
+    mat-sidenav-container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      width: 100%;
+    }
+    
+    /* Material Toolbar */
+    mat-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      background: #3f51b5;
+      color: white;
+      padding: 0 16px;
+      font-size: 16px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    
+    /* App title (LCP element) */
+    .app-title { 
+      margin-left: 8px; 
+      font-weight: 600;
+      font-size: 20px;
+      line-height: 32px;
+    }
+    
+    /* Spacer */
+    .spacer { 
+      flex: 1 1 auto; 
+    }
+    
+    /* Content area */
+    mat-sidenav-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: auto;
+    }
+    
+    .app-content {
+      padding: 16px;
+      flex: 1;
+    }
+    
+    /* Material Button minimal styling */
+    button[mat-icon-button] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: inherit;
+    }
+    
+    /* Material Icon minimal styling */
+    mat-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      line-height: 1;
+    }
+  </style>
+  
+  <!-- Load all styles asynchronously using media="print" + onload trick -->
+  <!-- This allows the page to paint with inline styles while full stylesheet loads -->
+  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'; this.onload=null">
+  <noscript><link rel="stylesheet" href="styles.css"></noscript>
+  
+  <!-- Defer Material Icons - load asynchronously -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="print" onload="this.media='all'; this.onload=null">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"></noscript>
+  
+  <!-- Preconnect for faster CDN connection -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
   <app-root></app-root>
+  <!-- Fallback for no-JS environments -->
+  <noscript>
+    <p>This application requires JavaScript to be enabled.</p>
+  </noscript>
 </body>
 </html>

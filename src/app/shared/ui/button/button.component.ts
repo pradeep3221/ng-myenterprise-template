@@ -1,8 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-button',
   standalone: true,
+  imports: [NgIf],
   templateUrl: './button.component.html',
   styleUrl: './button.component.scss'
 })
