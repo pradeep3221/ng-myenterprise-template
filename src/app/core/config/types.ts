@@ -6,8 +6,23 @@ export interface AnalyticsConfig {
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent';
 
+export interface AzureADConfig {
+  clientId: string;
+  tenantId: string;
+  redirectUri: string;
+  postLogoutRedirectUri?: string;
+  scopes: string[];
+  protectedResources?: {
+    [key: string]: {
+      endpoint: string;        // base URL or full endpoint to match prefix
+      scopes: string[];        // scopes required for this resource
+    };
+  };
+}
+
 export interface AuthConfig {
   tokenStorageKey: string;
+  azureAD?: AzureADConfig;
 }
 
 export interface HttpConfig {

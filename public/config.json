@@ -9,7 +9,14 @@
     "measurementId": "G-XXXXXXX"
   },
   "auth": {
-    "tokenStorageKey": "auth_token"
+    "tokenStorageKey": "auth_token",
+    "azureAD": {
+      "clientId": "b1897e52-d9c0-4608-8b79-6dddb122ffcd",
+      "tenantId": "355c1c16-4770-4491-ba27-7ce33a9900aa",
+      "redirectUri": "http://localhost:4200/auth/callback",
+      "postLogoutRedirectUri": "http://localhost:4200",
+      "scopes": ["openid", "profile", "User.Read"]
+    }
   },
   "http": {
     "timeoutMs": 20000,

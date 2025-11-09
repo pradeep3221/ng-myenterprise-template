@@ -6,6 +6,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
 import { provideRuntimeConfig } from './core/config/load-app-config';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { tokenRefreshInterceptor } from './core/interceptors/token-refresh.interceptor';
 import { mockApiInterceptor, provideMockApiFeature } from './core/mocking/mock-api.provider';
 import { GlobalErrorHandler } from './core/errors/global-error.handler';
 import { APP_CONFIG } from './core/config/app-config.token';
@@ -16,7 +17,11 @@ export const appConfig: ApplicationConfig = {
     provideRuntimeConfig(),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, mockApiInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      // Order matters: auth header first, mock API rewrite, then token refresh on 401
+      withInterceptors([authInterceptor, mockApiInterceptor, tokenRefreshInterceptor])
+    ),
     provideAnimations(),
     provideMockApiFeature(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },

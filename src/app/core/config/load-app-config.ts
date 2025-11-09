@@ -43,27 +43,33 @@ async function fetchRuntimeConfig(): Promise<AppConfig> {
 }
 
 export function provideRuntimeConfig(): Provider[] {
-  // Provide default config immediately to avoid blocking paint
-  // Fetch real config asynchronously after app renders
+  let configPromise: Promise<AppConfig> | null = null;
+  
   return [
     { 
       provide: APP_CONFIG, 
-      useValue: DEFAULT_CONFIG 
+      useFactory: () => {
+        // Return default config synchronously, will be replaced after fetch
+        return DEFAULT_CONFIG;
+      }
     },
-    // Optional: Load real config in background after paint
     {
       provide: APP_INITIALIZER,
       multi: true,
-      useFactory: () => {
-        return () => {
-          // Non-blocking: fetch config after app initializes
-          if (typeof window !== 'undefined') {
-            fetchRuntimeConfig().then(cfg => {
-              // In a real app, you'd dispatch this to a store/service
-              // to update the app state after first paint
-              console.log('[config] Loaded real config:', cfg);
-            }).catch(err => console.error('[config] Background load failed:', err));
-          }
+      deps: [APP_CONFIG],
+      useFactory: (config: AppConfig) => {
+        return async () => {
+          // Block app initialization until config is loaded
+          console.log('[config] Loading runtime config...');
+          const loadedConfig = await fetchRuntimeConfig();
+          console.log('[config] Loaded runtime config:', loadedConfig);
+          
+          // Update the config object in place
+          Object.keys(loadedConfig).forEach(key => {
+            (config as any)[key] = (loadedConfig as any)[key];
+          });
+          
+          console.log('[config] Updated APP_CONFIG with runtime values');
         };
       }
     }
