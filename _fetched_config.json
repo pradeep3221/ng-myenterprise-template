@@ -1,0 +1,27 @@
+{
+  "appName": "My Enterprise App",
+  "apiBaseUrl": "https://api.example.com/v1",
+  "logLevel": "debug",
+  "envName": "local",
+  "analytics": {
+    "enabled": false,
+    "provider": "gtag",
+    "measurementId": "G-XXXXXXX"
+  },
+  "auth": {
+    "tokenStorageKey": "auth_token"
+  },
+  "http": {
+    "timeoutMs": 20000,
+    "retry": 1
+  },
+  "theme": {
+    "darkMode": false,
+    "primaryColorHex": "#3f51b5"
+  },
+  "features": {
+    "enableMockApi": false,
+    "enableDebugTools": true
+  }
+}
+

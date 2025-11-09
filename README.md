@@ -1,6 +1,6 @@
 # NgMyenterpriseTemplate
 
-A production-ready **Angular 19 Enterprise Template** with SSR, Material Design, advanced state management, form validation, mock API, lazy loading, and comprehensive documentation.
+A production-ready **Angular 19 Enterprise Template** with SSR and hydration, Material Design, advanced state management, form validation, mock API, lazy loading, and comprehensive documentation.
 
 **Tech Stack:**
 - Angular 19.2+ (Standalone Components)
