@@ -63,6 +63,7 @@ import { SidebarService } from './services/sidebar.service';
         flex-direction: column;
         height: 100vh;
         width: 100vw;
+        overflow: hidden;
       }
 
       .admin-layout-wrapper {
@@ -75,6 +76,7 @@ import { SidebarService } from './services/sidebar.service';
       app-admin-header {
         flex-shrink: 0;
         z-index: 10;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .sidenav-container {
@@ -84,11 +86,12 @@ import { SidebarService } from './services/sidebar.service';
 
       .sidebar-drawer {
         width: 280px;
-        background-color: #fafafa;
-        border-right: 1px solid #e0e0e0;
+        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        border-right: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 
         @media (max-width: 960px) {
-          width: 256px;
+          width: 260px;
         }
 
         @media (max-width: 600px) {
@@ -100,7 +103,7 @@ import { SidebarService } from './services/sidebar.service';
         display: flex;
         flex-direction: column;
         overflow: auto;
-        background-color: #f5f5f5;
+        background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
 
         ::ng-deep {
           .mat-sidenav-content {
@@ -112,8 +115,13 @@ import { SidebarService } from './services/sidebar.service';
 
       .page-content {
         flex: 1;
-        padding: 24px;
+        padding: 32px;
         overflow-y: auto;
+        animation: fadeIn 0.3s ease-in;
+
+        @media (max-width: 960px) {
+          padding: 24px;
+        }
 
         @media (max-width: 600px) {
           padding: 16px;
@@ -124,10 +132,21 @@ import { SidebarService } from './services/sidebar.service';
         }
       }
 
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       /* Responsive layout adjustments */
       @media (max-width: 960px) {
         .sidebar-drawer {
-          width: 256px;
+          width: 260px;
         }
       }
 

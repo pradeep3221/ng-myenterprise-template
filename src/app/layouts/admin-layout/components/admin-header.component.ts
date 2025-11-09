@@ -85,15 +85,35 @@ import { AuthService } from '../../../core/services/auth.service';
       .admin-header {
         display: flex;
         align-items: center;
-        padding: 0 16px;
-        gap: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 0 20px;
+        gap: 12px;
+        height: 64px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, 
+            rgba(255,255,255,0.1) 0%, 
+            rgba(255,255,255,0.05) 50%, 
+            rgba(255,255,255,0) 100%);
+          pointer-events: none;
+        }
       }
 
       .toolbar-start {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 20px;
+        position: relative;
+        z-index: 1;
       }
 
       .toolbar-spacer {
@@ -103,32 +123,88 @@ import { AuthService } from '../../../core/services/auth.service';
       .toolbar-end {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
       }
 
       .app-title {
-        font-size: 20px;
-        font-weight: 500;
+        font-size: 22px;
+        font-weight: 600;
         letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        color: #ffffff;
       }
 
       .menu-toggle {
+        color: rgba(255, 255, 255, 0.95);
+        transition: all 0.2s ease;
+
         &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.15);
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
         }
       }
 
       .notification-icon {
-        position: relative;
+        color: rgba(255, 255, 255, 0.95);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+          transform: scale(1.05);
+        }
+      }
+
+      .user-menu-trigger {
+        color: rgba(255, 255, 255, 0.95);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+          transform: scale(1.05);
+        }
+
+        ::ng-deep mat-icon {
+          font-size: 32px;
+          height: 32px;
+          width: 32px;
+        }
+      }
+
+      @media (max-width: 960px) {
+        .admin-header {
+          height: 56px;
+        }
+
+        .app-title {
+          font-size: 18px;
+        }
       }
 
       @media (max-width: 600px) {
         .app-title {
           font-size: 16px;
+          max-width: 150px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .admin-header {
-          padding: 0 8px;
+          padding: 0 12px;
+          gap: 8px;
+        }
+
+        .toolbar-start {
+          gap: 12px;
+        }
+
+        .toolbar-end {
           gap: 4px;
         }
       }

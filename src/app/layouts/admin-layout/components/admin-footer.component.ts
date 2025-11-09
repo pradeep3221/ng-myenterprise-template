@@ -43,12 +43,14 @@ import { RouterModule } from '@angular/router';
       }
 
       .admin-footer {
-        background-color: #f5f5f5;
-        border-top: 1px solid #e0e0e0;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
         margin-top: auto;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
 
         mat-divider {
           margin: 0;
+          opacity: 0.5;
         }
       }
 
@@ -56,7 +58,7 @@ import { RouterModule } from '@angular/router';
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 16px 24px;
+        padding: 20px 32px;
         gap: 24px;
         flex-wrap: wrap;
       }
@@ -68,45 +70,68 @@ import { RouterModule } from '@angular/router';
 
         &.version {
           margin-left: auto;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 6px 16px;
+          border-radius: 20px;
+          box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
         }
       }
 
       .copyright {
         margin: 0;
-        font-size: 12px;
-        color: #666;
+        font-size: 13px;
+        color: #555;
+        font-weight: 400;
       }
 
       .footer-nav {
         display: flex;
-        gap: 24px;
+        gap: 28px;
         align-items: center;
       }
 
       .footer-link {
-        font-size: 12px;
-        color: #1976d2;
+        font-size: 13px;
+        color: #667eea;
         text-decoration: none;
-        transition: color 0.3s ease;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+          transition: width 0.3s ease;
+        }
 
         &:hover {
-          color: #1565c0;
-          text-decoration: underline;
+          color: #764ba2;
+          transform: translateY(-2px);
+
+          &::after {
+            width: 100%;
+          }
         }
       }
 
       .version-text {
         font-size: 12px;
-        color: #999;
-        font-weight: 500;
+        color: #ffffff;
+        font-weight: 600;
+        letter-spacing: 0.5px;
       }
 
       @media (max-width: 768px) {
         .footer-content {
           flex-direction: column;
           align-items: flex-start;
-          padding: 12px 16px;
-          gap: 12px;
+          padding: 16px 24px;
+          gap: 16px;
         }
 
         .footer-section {
@@ -114,22 +139,23 @@ import { RouterModule } from '@angular/router';
 
           &.version {
             margin-left: 0;
+            width: auto;
           }
         }
 
         .footer-nav {
           flex-wrap: wrap;
-          gap: 16px;
+          gap: 20px;
         }
 
         .footer-link {
-          font-size: 11px;
+          font-size: 12px;
         }
       }
 
       @media (max-width: 480px) {
         .footer-content {
-          padding: 8px 12px;
+          padding: 12px 16px;
         }
 
         .copyright {
@@ -137,11 +163,15 @@ import { RouterModule } from '@angular/router';
         }
 
         .footer-nav {
-          gap: 12px;
+          gap: 16px;
         }
 
         .footer-link {
-          font-size: 10px;
+          font-size: 11px;
+        }
+
+        .version-text {
+          font-size: 11px;
         }
       }
     `

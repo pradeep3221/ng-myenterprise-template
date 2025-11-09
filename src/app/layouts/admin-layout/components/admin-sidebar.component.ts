@@ -68,73 +68,121 @@ interface NavItem {
       }
 
       .admin-sidebar {
-        padding: 8px 0;
+        padding: 16px 0;
         height: 100%;
         overflow-y: auto;
 
         // Custom scrollbar
         &::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
 
         &::-webkit-scrollbar-track {
-          background: transparent;
+          background: rgba(0, 0, 0, 0.02);
+          border-radius: 4px;
         }
 
         &::-webkit-scrollbar-thumb {
-          background: #ccc;
-          border-radius: 3px;
+          background: rgba(102, 126, 234, 0.3);
+          border-radius: 4px;
+          transition: background 0.2s;
 
           &:hover {
-            background: #999;
+            background: rgba(102, 126, 234, 0.5);
           }
         }
       }
 
       .nav-item {
-        margin: 0 8px;
-        border-radius: 4px;
+        margin: 4px 12px;
+        border-radius: 8px;
         color: rgba(0, 0, 0, 0.87);
-        transition: all 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 14px;
+        height: 48px;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          transform: scaleY(0);
+          transition: transform 0.3s ease;
+        }
 
         &:hover {
-          background-color: rgba(0, 0, 0, 0.04);
+          background: linear-gradient(90deg, 
+            rgba(102, 126, 234, 0.08) 0%, 
+            rgba(118, 75, 162, 0.08) 100%);
+          transform: translateX(4px);
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+
+          &::before {
+            transform: scaleY(1);
+          }
         }
 
         &.active {
-          background-color: rgba(63, 81, 181, 0.12);
-          color: #3f51b5;
-          font-weight: 500;
+          background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.15) 0%, 
+            rgba(118, 75, 162, 0.15) 100%);
+          color: #667eea;
+          font-weight: 600;
+          box-shadow: 0 3px 10px rgba(102, 126, 234, 0.2);
+
+          &::before {
+            transform: scaleY(1);
+          }
 
           mat-icon {
-            color: #3f51b5;
+            color: #667eea;
+            transform: scale(1.1);
           }
         }
 
         mat-icon {
           margin-right: 16px;
-          transition: color 0.2s ease;
+          transition: all 0.3s ease;
+          color: rgba(0, 0, 0, 0.6);
         }
       }
 
       .submenu-item {
         padding-left: 56px;
         font-size: 13px;
-        margin: 0 8px;
+        margin: 2px 12px;
+        height: 44px;
+        border-radius: 6px;
+
+        &::before {
+          display: none;
+        }
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.06);
+          transform: translateX(8px);
+        }
 
         &.active {
-          background-color: rgba(63, 81, 181, 0.08);
-          color: #3f51b5;
+          background: rgba(102, 126, 234, 0.12);
+          color: #667eea;
+          font-weight: 500;
         }
       }
 
       @media (max-width: 600px) {
         .admin-sidebar {
-          padding: 4px 0;
+          padding: 12px 0;
         }
 
         .nav-item {
-          margin: 0 4px;
+          margin: 2px 8px;
+          height: 44px;
 
           mat-icon {
             margin-right: 12px;
@@ -144,6 +192,7 @@ interface NavItem {
         .submenu-item {
           padding-left: 48px;
           font-size: 12px;
+          height: 40px;
         }
       }
     `

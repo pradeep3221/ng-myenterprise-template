@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { OrdersService, Order } from '../../data-access/orders.service';
-import { NgFor, NgIf } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-orders-list-page',
   standalone: true,
-  imports: [NgFor, NgIf, RouterLink],
+  imports: [RouterLink, MatIconModule, MatButtonModule],
   templateUrl: './orders-list.page.html',
   styleUrl: './orders-list.page.scss'
 })

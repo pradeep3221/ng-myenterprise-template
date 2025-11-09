@@ -1,9 +1,40 @@
-<h2>Orders</h2>
-<ul>
-  <li *ngFor="let o of orders">
-    #{{o.number}} - ${{o.total}}
-    <a [routerLink]="['/orders', o.id]">View</a>
-  </li>
-  <li *ngIf="!orders.length">No orders yet.</li>
-  
-</ul>
+<div class="page-header">
+  <h1 class="page-title">Orders Management</h1>
+  <p class="page-description">View and manage all customer orders</p>
+</div>
+
+<div class="orders-container">
+  @if (orders.length > 0) {
+    <div class="orders-grid">
+      @for (order of orders; track order.id) {
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-number">
+              <mat-icon class="order-icon">receipt</mat-icon>
+              <span class="number-text">#{{ order.number }}</span>
+            </div>
+            <div class="order-total">${{ order.total }}</div>
+          </div>
+          
+          <div class="order-actions">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              [routerLink]="['/orders', order.id]"
+              class="view-btn"
+            >
+              <mat-icon>visibility</mat-icon>
+              View Details
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">inbox</mat-icon>
+      <h3>No Orders Yet</h3>
+      <p>Orders will appear here once customers start placing them.</p>
+    </div>
+  }
+</div>
