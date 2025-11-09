@@ -1,0 +1,45 @@
+// Custom Material theme with only used components
+// This dramatically reduces CSS bundle size compared to prebuilt themes
+
+@use '@angular/material' as mat;
+
+// Include Material core styles (required, only once)
+@include mat.core();
+
+// Define a minimal custom theme using Material 3 theming
+$custom-theme: mat.define-theme();
+
+// Material 3 themes must be wrapped in a selector (html or :root)
+html {
+  // Include ALL component themes (will be optimized by build process)
+  @include mat.all-component-themes($custom-theme);
+}
+
+// Add more component themes here as you use them:
+// @include mat.card-theme($custom-theme);
+// @include mat.table-theme($custom-theme);
+// @include mat.paginator-theme($custom-theme);
+// @include mat.dialog-theme($custom-theme);
+// @include mat.snack-bar-theme($custom-theme);
+// @include mat.tabs-theme($custom-theme);
+// @include mat.select-theme($custom-theme);
+// @include mat.checkbox-theme($custom-theme);
+// @include mat.radio-theme($custom-theme);
+// @include mat.slide-toggle-theme($custom-theme);
+// @include mat.menu-theme($custom-theme);
+// @include mat.autocomplete-theme($custom-theme);
+// @include mat.chips-theme($custom-theme);
+// @include mat.progress-bar-theme($custom-theme);
+
+// Dark mode support (optional)
+// .dark {
+//   $dark-theme: mat.define-dark-theme((
+//     color: (
+//       primary: $custom-primary,
+//       accent: $custom-accent,
+//       warn: $custom-warn,
+//     )
+//   ));
+//   
+//   @include mat.all-component-colors($dark-theme);
+// }

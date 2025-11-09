@@ -1,6 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection, ErrorHandler, APP_INITIALIZER, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
@@ -15,7 +14,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRuntimeConfig(),
     provideRouter(routes),
-    provideClientHydration(withEventReplay()),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor, mockApiInterceptor])),
     provideAnimations(),
     provideMockApiFeature(),

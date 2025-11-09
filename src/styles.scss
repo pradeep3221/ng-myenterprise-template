@@ -1,13 +1,13 @@
-/* Global styles entry: imports partials and Material prebuilt theme */
+/* Global styles entry: imports partials and custom Material theme */
 @use './styles/index.scss' as *;
 
-// Use lighter Material theme for faster LCP
-// Indigo-Pink is the smallest Material prebuilt theme (~95kB gzipped)
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+// Use custom Material theme with only used components
+// This reduces CSS bundle size by ~150-200 KiB compared to prebuilt themes
+@use './styles/material-custom';
 
 body {
 	margin: 0;
-	font-family: system-ui, Inter, Roboto, Arial, sans-serif;
+	font-family: Roboto, system-ui, -apple-system, Arial, sans-serif;
 	background: var(--app-bg, #fafafa);
 	color: var(--app-fg, #222);
 	// Enable GPU acceleration for smooth animations

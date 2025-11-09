@@ -8,13 +8,18 @@
   <meta name="description" content="Enterprise Angular 19 template with SSR, Material Design, and performance optimizations">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   
-  <!-- Load fonts without blocking render -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" as="style">
+  <!-- Preconnect for faster CDN connection -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Load fonts with font-display: swap to show text immediately -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+  
+  <!-- Load Material Icons with font-display: block to prevent icon flash -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block">
   
   <!-- Critical CSS inline - minimal paint for FCP/LCP -->
   <style>
-    /* Import Roboto with swap display - text appears immediately */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
     
     /* Reset & Base */
     html, body { 
@@ -105,20 +110,18 @@
       font-size: 24px;
       line-height: 1;
     }
+    
+    /* Loading indicator for better UX */
+    app-root:empty::after {
+      content: "Loading...";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-size: 18px;
+      color: #666;
+    }
   </style>
-  
-  <!-- Load all styles asynchronously using media="print" + onload trick -->
-  <!-- This allows the page to paint with inline styles while full stylesheet loads -->
-  <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'; this.onload=null">
-  <noscript><link rel="stylesheet" href="styles.css"></noscript>
-  
-  <!-- Defer Material Icons - load asynchronously -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="print" onload="this.media='all'; this.onload=null">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"></noscript>
-  
-  <!-- Preconnect for faster CDN connection -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
   <app-root></app-root>
