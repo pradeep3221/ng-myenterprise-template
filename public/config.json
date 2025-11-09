@@ -1,0 +1,13 @@
+{
+  "appName": "My Enterprise App",
+  "apiBaseUrl": "https://api.example.com/v1",
+  "logLevel": "debug",
+  "analytics": {
+    "enabled": false,
+    "provider": "gtag",
+    "measurementId": "G-XXXXXXX"
+  },
+  "auth": {
+    "tokenStorageKey": "auth_token"
+  }
+}

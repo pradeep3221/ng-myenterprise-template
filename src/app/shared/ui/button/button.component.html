@@ -1,0 +1,10 @@
+<button
+  class="btn"
+  [attr.type]="type"
+  [class.btn--secondary]="variant==='secondary'"
+  [class.btn--text]="variant==='text'"
+  [disabled]="disabled || loading"
+  (click)="onClick($event)">
+  <span *ngIf="loading" class="btn__spinner" aria-hidden="true"></span>
+  <ng-content></ng-content>
+</button>

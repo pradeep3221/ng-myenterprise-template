@@ -1,0 +1,9 @@
+<h2>Orders</h2>
+<ul>
+  <li *ngFor="let o of orders">
+    #{{o.number}} - ${{o.total}}
+    <a [routerLink]="['/orders', o.id]">View</a>
+  </li>
+  <li *ngIf="!orders?.length">No orders yet.</li>
+  
+</ul>

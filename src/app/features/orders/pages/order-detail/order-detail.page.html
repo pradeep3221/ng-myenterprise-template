@@ -1,0 +1,8 @@
+<a routerLink="/orders">Back to Orders</a>
+<div *ngIf="order; else notFound">
+  <h2>Order #{{order.number}}</h2>
+  <p>Total: ${{order.total}}</p>
+</div>
+<ng-template #notFound>
+  <p>Order not found.</p>
+</ng-template>

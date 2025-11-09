@@ -1,0 +1,21 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font: inherit;
+  border: none;
+  cursor: pointer;
+  padding: .625rem 1rem;
+  border-radius: 4px;
+  background: var(--color-primary, #1976d2);
+  color: #fff;
+  transition: background .2s;
+  &--secondary { background: #555; }
+  &--text { background: transparent; color: var(--color-primary, #1976d2); }
+  &:disabled { opacity: .6; cursor: not-allowed; }
+}
+
+.btn__spinner {
+  width: 1em; height: 1em; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
