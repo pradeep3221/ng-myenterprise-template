@@ -57,3 +57,20 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+
+## Quick Start Guide
+
+```
+**ng new ng-myenterprise-template**
+```
+//To create an Angular project within an existing folder using the Angular CLI, follow these steps: Navigate to the Existing Folder.
+```
+ng new ng-myenterprise-template --directory .
+```
+
+✔ Which stylesheet format would you like to use? Sass (SCSS) [https://sass-lang.com/documentation/syntax#scss]
+✔ Do you want to enable Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering)? Yes
+	https://angular.dev/guide/ssr
+✔ Would you like to use the Server Routing and App Engine APIs (Developer Preview) for this server application? Yes
