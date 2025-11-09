@@ -1,6 +1,14 @@
 # Angular Enterprise Template — Copilot Instructions
 
-**Project Context:** Production Angular 19 enterprise application with SSR, runtime configuration, signals-based state management, and mock API support.
+**Project Context:** Production Angular 19 enterprise application with SSR, runtime configuration, signals-based state management, and mock API support. Uses standalone components, lazy loading, Material Design, and externalized config via JSON.
+
+**Key Tech Stack:**
+- Angular 19.2+ (Standalone, no NgModules)
+- Angular Material
+- Signals-based state (no @ngrx)
+- json-server for mock API
+- SSR/SSG ready
+- TypeScript strict mode
 
 ---
 
@@ -10,15 +18,44 @@
 
 ```
 app/
-├── core/              # App singletons (services, guards, interceptors, config)
-├── shared/            # Reusable stateless UI (components, directives, validators)
-├── features/          # Lazy-loaded feature modules (orders, etc.)
-├── app.routes.ts      # Root routing (lazy-load features)
-├── app.config.ts      # Root providers (DI, HTTP, Router, signals state)
+├── core/              # App singletons: services, guards, interceptors, config, state
+├── shared/            # Reusable stateless UI: components, directives, validators
+├── features/          # Lazy-loaded feature modules (one feature = one folder)
+├── app.routes.ts      # Root routing (lazy-load features via loadChildren)
+├── app.config.ts      # Root providers (DI, HTTP, Router, error handling)
 └── app.component.ts   # Material shell (toolbar + sidenav + router-outlet)
 ```
 
-**Key Principle:** Organize by feature first, by type second. Cross-cutting concerns live in `core/`, reusable UI lives in `shared/`, business logic lives in `features/`.
+**Key Principle:** 
+- **Feature-first organization** (by business domain)
+- **Type-second organization** (pages/, data-access/, shared/)
+- **core/** for cross-cutting singletons (never provided in features)
+- **shared/** for reusable UI with NO business state
+- **features/** for lazy-loaded business logic isolated per route
+
+---
+
+## App Initialization & Bootstrap Sequence
+
+**Critical Flow** (`main.ts` → `app.config.ts` → `provideRuntimeConfig()` → `APP_INITIALIZER`):
+
+```
+1. main.ts bootstraps app with appConfig
+2. provideRuntimeConfig() runs first (via multi: true APP_INITIALIZER)
+   → Fetches public/config.json
+   → Validates + normalizes with defaults (see validate-config.ts)
+   → Injects as APP_CONFIG token
+3. Dark mode applied if config.theme.darkMode = true (second APP_INITIALIZER)
+4. Routes + HTTP interceptors initialized
+5. GlobalErrorHandler catches all unhandled errors
+```
+
+**If config load fails:** App still loads with hardcoded defaults. Check browser console for validation errors.
+
+**When Adding New Startup Logic:**
+- Add to `app.config.ts` providers array
+- If it depends on config, add as `APP_INITIALIZER` AFTER `provideRuntimeConfig()`
+- Always inject dependencies, don't use hardcoded values
 
 ---
 
@@ -28,25 +65,50 @@ app/
 
 **Problem Solved:** Externalize config to avoid rebuilds per environment.
 
-**Pattern:**
-- `public/config.json` contains all settings (apiBaseUrl, logLevel, feature flags, theme, auth, HTTP timeouts).
-- Loaded at app startup via `APP_INITIALIZER` in `app.config.ts`.
-- Validated and typed via `core/config/validate-config.ts`.
-- Injected as `APP_CONFIG` token throughout app.
+**Integration Points:**
+- `public/config.json` – Single source of truth (no compile-time config needed)
+- `core/config/types.ts` – TypeScript interface (`AppConfig`)
+- `core/config/validate-config.ts` – Validation + defaults + normalization
+- `core/config/app-config.token.ts` – Injection token
+- `core/config/load-app-config.ts` – Async loader via `APP_INITIALIZER`
+- `app.config.ts` – Registered via `provideRuntimeConfig()`
 
-**Key Flow:**
-```
-app bootstrap
-  → provideRuntimeConfig() (defaults + async fetch)
-  → GlobalErrorHandler catches load failures
-  → API service, Logger, Auth all consume APP_CONFIG
-```
+**Key Values & Their Impact:**
+- `apiBaseUrl` – Used by `ApiService.buildUrl()` for production API calls
+- `enableMockApi` – If true, `mockApiInterceptor` rewrites requests to `http://localhost:3000`
+- `logLevel` – Controls `LoggerService` output (debug, info, warn, error, silent)
+- `darkMode` – Applied to document.documentElement at startup
+- `timeoutMs` / `retry` – HTTP behavior (timeout, automatic retry count)
+- `tokenStorageKey` – Where `AuthService` stores JWT (`localStorage`)
 
 **When Adding New Config:**
-1. Update `public/config.json` structure
-2. Update `core/config/types.ts` interface
-3. Update `core/config/validate-config.ts` validation + defaults
-4. Inject `APP_CONFIG` where needed
+1. Update `public/config.json` with new field
+2. Update `AppConfig` interface in `core/config/types.ts`
+3. Update `DEFAULTS` + validation logic in `core/config/validate-config.ts`
+4. Inject `APP_CONFIG` in services/components that need the value
+
+**Example: Add a new feature flag**
+```typescript
+// types.ts
+export interface FeatureFlags {
+  enableMockApi?: boolean;
+  enableDebugTools?: boolean;
+  enableNewDashboard?: boolean;  // NEW
+}
+
+// validate-config.ts - add to DEFAULTS
+features: {
+  enableMockApi: false,
+  enableDebugTools: true,
+  enableNewDashboard: false,  // NEW
+}
+
+// public/config.json
+{ "features": { "enableNewDashboard": true } }
+
+// component
+if (inject(APP_CONFIG).features?.enableNewDashboard) { /* show new UI */ }
+```
 
 **Mock API Toggle:** Set `config.features.enableMockApi: true` to route all HTTP calls to `localhost:3000` (json-server).
 
@@ -54,33 +116,116 @@ app bootstrap
 
 **Pattern:** Use Angular Signals (`signal()`, `computed()`, `effect()`) instead of RxJS for component/store state.
 
-**Example: OrdersStore** (`core/state/orders.store.ts`)
+**Core Concepts:**
+- `signal()` – Mutable source of truth (only modified via `.set()` or `.update()`)
+- `computed()` – Derived read-only state (automatically recalculated when dependencies change)
+- `effect()` – Side effects (logging, subscriptions) triggered by signal changes
+- Signals are **synchronous** (unlike Observables), enabling direct template access without async pipe
+
+**Store Pattern: OrdersStore** (`core/state/orders.store.ts`)
 ```typescript
-// Single source of truth
-private readonly state = signal<OrdersState>({ items: [], loading: false, ... });
+@Injectable({ providedIn: 'root' })
+export class OrdersStore {
+  // Private single source of truth
+  private readonly state = signal<OrdersState>({
+    items: [],
+    selectedId: null,
+    loading: false,
+    error: null
+  });
 
-// Expose read-only signals
-items = computed(() => this.state().items);
-totalOrders = computed(() => this.items().length);
-selectedOrder = computed(() => this.items().find(o => o.id === this.selectedId()));
+  // Expose read-only signals
+  readonly items = computed(() => this.state().items);
+  readonly loading = computed(() => this.state().loading);
+  readonly error = computed(() => this.state().error);
 
-// Mutations update the entire state object
-setItems(orders) { this.state.update(s => ({ ...s, items: orders })); }
+  // Computed derived state (automatically memoized)
+  readonly selectedOrder = computed(() => {
+    const items = this.items();
+    const id = this.state().selectedId;
+    return id !== null ? items.find(o => o.id === id) ?? null : null;
+  });
+  readonly totalOrders = computed(() => this.items().length);
+  readonly completedOrders = computed(() =>
+    this.items().filter(o => o.status === 'completed').length
+  );
+
+  // Mutations always update entire state object
+  setItems(items: Order[]): void {
+    this.state.update(s => ({ ...s, items, error: null }));
+  }
+  addItem(order: Order): void {
+    this.state.update(s => ({ ...s, items: [...s.items, order] }));
+  }
+  updateItem(id: number, updates: Partial<Order>): void {
+    this.state.update(s => ({
+      ...s,
+      items: s.items.map(o => (o.id === id ? { ...o, ...updates } : o))
+    }));
+  }
+  removeItem(id: number): void {
+    this.state.update(s => ({
+      ...s,
+      items: s.items.filter(o => o.id !== id)
+    }));
+  }
+  setLoading(loading: boolean): void {
+    this.state.update(s => ({ ...s, loading }));
+  }
+  reset(): void {
+    this.state.set({ items: [], selectedId: null, loading: false, error: null });
+  }
+}
 ```
 
 **Usage in Components:**
 ```typescript
-store = inject(OrdersStore);
+@Component({
+  standalone: true,
+  template: `
+    <div>Total Orders: {{ store.totalOrders() }}</div>
+    
+    @if (store.loading()) {
+      <mat-spinner></mat-spinner>
+    } @else {
+      @for (order of store.items(); track order.id) {
+        <button (click)="onSelect(order.id)">{{ order.name }}</button>
+      }
+    }
+    
+    @if (store.selectedOrder(); as order) {
+      <div>Selected: {{ order.name }} ({{ order.status }})</div>
+    }
+  `
+})
+export class OrdersListPage implements OnInit {
+  store = inject(OrdersStore);
+  private apiService = inject(ApiService);
 
-// Template can call signals as functions
-<div>{{ store.totalOrders() }}</div>
-@for (order of store.items(); track order.id) { ... }
-
-// Manually update when needed
-this.store.setItems(apiResponse);
+  ngOnInit() {
+    this.store.setLoading(true);
+    this.apiService.get<Order[]>('/orders').subscribe({
+      next: (data) => {
+        this.store.setItems(data);
+        this.store.setLoading(false);
+      },
+      error: (err) => {
+        this.store.setError('Failed to load');
+        this.store.setLoading(false);
+      }
+    });
+  }
+}
 ```
 
-**Why:** Signals provide fine-grained reactivity; no async pipe needed in templates; side effects via `effect()`.
+**Why Signals over RxJS:**
+- Fine-grained reactivity (only computed signals with changed dependencies re-evaluate)
+- Direct template access (no async pipe needed)
+- Side effects via `effect()` (auto-cleanup on component destroy)
+- Better performance for frequent updates (no Observable subscription overhead)
+- Simpler mental model for component state
+
+**RxJS still used for:** Long-lived API streams, complex async flows, operators (retry, debounce, switchMap)
 
 ---
 
@@ -110,71 +255,201 @@ export const ordersRoutes: Route[] = [
 
 ### 4. HTTP Interception & Mock API Routing
 
-**Interceptors** (`core/interceptors/`):
-1. **auth.interceptor.ts** – Injects `Authorization: Bearer <token>` header if token exists.
-2. **mockApiInterceptor** – If `config.features.enableMockApi`, rewrites request URL to `http://localhost:3000/...`.
+**Interceptors Chain** (`core/interceptors/`):
+
+1. **authInterceptor.ts** – Injects `Authorization: Bearer <token>` if token exists
+   ```typescript
+   export const authInterceptor: HttpInterceptorFn = (req, next) => {
+     const auth = inject(AuthService);
+     const token = auth.token;
+     if (token) {
+       req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+     }
+     return next(req);
+   };
+   ```
+
+2. **mockApiInterceptor** – Routes requests to `http://localhost:3000` if `enableMockApi` is true
+   - Enabled in `app.config.ts` via `withInterceptors([authInterceptor, mockApiInterceptor])`
+   - Controlled by `config.features.enableMockApi` flag
+
+**HTTP Service** (`core/services/api.service.ts`):
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+
+  get<T>(path: string, params?: Record<string, string | number | boolean>) {
+    return this.http.get<T>(this.getMockApiUrl(path), { params: params as any })
+      .pipe(
+        timeout(this.config.http?.timeoutMs ?? 15000),
+        retry(this.config.http?.retry ?? 0),
+        catchError(err => throwError(() => err))
+      );
+  }
+
+  post<T>(path: string, body: unknown) {
+    return this.http.post<T>(this.getMockApiUrl(path), body)
+      .pipe(timeout(this.config.http?.timeoutMs ?? 15000), catchError(err => throwError(() => err)));
+  }
+
+  private getMockApiUrl(path: string): string {
+    if (this.config?.features?.enableMockApi) {
+      return `http://localhost:3000/${path.replace(/^\//, '')}`;
+    }
+    return this.buildUrl(path);
+  }
+
+  private buildUrl(path: string): string {
+    return `${this.config.apiBaseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+  }
+}
+```
 
 **Flow:**
 ```
 ApiService.get('/orders')
   → authInterceptor adds Bearer token
   → mockApiInterceptor rewrites to http://localhost:3000/orders (if enabled)
+  → Timeout + Retry operators applied
   → HttpClient sends request
-  → Retry + timeout policies applied
 ```
 
 **When Adding New API Calls:**
-- Use `ApiService` (injectable in any component/service).
-- All requests automatically get Bearer token + mock routing.
-- Config-driven timeouts and retry counts.
+- Always use `ApiService` (injectable in any component/service)
+- All requests automatically get Bearer token + mock routing
+- Config-driven timeouts and retry counts are applied automatically
+- Pass `/path` format (leading slash will be stripped)
 
 ---
 
 ### 5. Form Validation with Custom Validators
 
-**Location:** `shared/validators/`
+**Location:** `shared/validators/` – 10+ reusable validators with consistent error handling
 
-**Usage:**
+**Available Validators** (`custom-validators.ts`):
+- `required()` – Non-empty, trimmed string
+- `email()` – Valid email format
+- `minLength(n)` – Minimum string length
+- `maxLength(n)` – Maximum string length
+- `pattern(regex)` – Regex match
+- `range(min, max)` – Number in range
+- `url()` – Valid URL
+- `phone()` – Phone number format
+- `matchFields(field1, field2)` – Field equality (for password confirmation)
+- `asyncAvailable(checkFn)` – Async validation (e.g., username uniqueness)
+
+**Usage Pattern:**
 ```typescript
-form = this.fb.group({
-  email: ['', [customValidators.required(), customValidators.email()]],
-  password: ['', customValidators.minLength(6)],
-  confirmPassword: ['']
-}, { 
-  validators: customValidators.matchFields('password', 'confirmPassword')
-});
+import { customValidators } from './shared/validators/custom-validators';
+import { FormValidatorService } from './shared/validators/form-validator.service';
+
+@Component({
+  standalone: true,
+  template: `
+    <form [formGroup]="form">
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" />
+        @if (validator.isInvalid(form.get('email'))) {
+          <mat-error>{{ validator.getErrorMessage(form.get('email'), 'Email') }}</mat-error>
+        }
+      </mat-form-field>
+      
+      <button [disabled]="!validator.canSubmit(form)" (click)="onSubmit()">
+        Sign In
+      </button>
+    </form>
+  `
+})
+export class LoginFormComponent {
+  form: FormGroup;
+  validator = inject(FormValidatorService);
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      email: ['', [customValidators.required(), customValidators.email()]],
+      password: ['', [customValidators.required(), customValidators.minLength(6)]],
+      phone: ['', customValidators.phone()],
+      website: ['', customValidators.url()],
+      confirmPassword: ['']
+    }, { 
+      validators: customValidators.matchFields('password', 'confirmPassword')
+    });
+  }
+
+  onSubmit(): void {
+    if (!this.validator.canSubmit(this.form)) {
+      this.validator.markAllAsTouched(this.form);
+      return;
+    }
+    // Process form
+  }
+}
 ```
 
-**Service Helper** (`FormValidatorService`):
-```typescript
-isFieldInvalid(field) { /* true if touched + invalid */ }
-getErrorMessage(field, label) { /* "Email is required" or "Invalid email format" */ }
-canSubmit(form) { /* check valid + not already submitting */ }
-markAllAsTouched(form) { /* for error display on submit */ }
-```
-
-**Available Validators:** required, email, minLength, maxLength, pattern, range, url, phone, matchFields, asyncAvailable.
+**FormValidatorService API:**
+- `isInvalid(control)` – Returns true if touched AND invalid
+- `getErrorMessage(control, label)` – Returns user-friendly message (e.g., "Email is required" or "Invalid email format")
+- `canSubmit(form)` – Check if form is valid AND not already submitting
+- `markAllAsTouched(form)` – For error display on submit
 
 ---
 
 ### 6. Auth Flow
 
 **Components:**
-- **AuthService** (`core/services/auth.service.ts`) – Signals-based token management.
-- **AuthGuard** (`core/guards/auth.guard.ts`) – Protects routes.
-- **AuthInterceptor** – Injects token in every request.
+- **AuthService** (`core/services/auth.service.ts`) – Signals-based token management
+- **AuthGuard** (`core/guards/auth.guard.ts`) – Protects routes
+- **AuthInterceptor** – Automatically injects token in every HTTP request
+- **Storage** – Token persisted in localStorage via `auth.tokenStorageKey` from config
 
-**Pattern:**
+**AuthService Implementation:**
 ```typescript
-// In login form
-authService.login(email, password)
-  .subscribe({ next: () => router.navigate(['/orders']) });
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private config = inject(APP_CONFIG);
+  private tokenSignal = signal<string | null>(this.readToken());
 
-// In a route
-canActivate: [authGuard]
+  get token() { return this.tokenSignal(); }
+  isAuthenticated() { return !!this.tokenSignal(); }
 
-// Token auto-injected in all HTTP requests
+  login(token: string) {
+    localStorage.setItem(this.config.auth?.tokenStorageKey || 'auth_token', token);
+    this.tokenSignal.set(token);
+  }
+
+  logout() {
+    localStorage.removeItem(this.config.auth?.tokenStorageKey || 'auth_token');
+    this.tokenSignal.set(null);
+  }
+
+  private readToken(): string | null {
+    return localStorage.getItem(this.config.auth?.tokenStorageKey || 'auth_token');
+  }
+}
 ```
+
+**Protecting Routes:**
+```typescript
+// In app.routes.ts
+{
+  path: 'orders',
+  canActivate: [authGuard],  // Protect this route
+  loadChildren: () => import('./features/orders/orders.routes').then(m => m.ordersRoutes)
+}
+```
+
+**Usage Flow:**
+```
+1. User logs in → AuthService.login(token) stores in localStorage + signal
+2. Subsequent HTTP requests → authInterceptor reads token and injects header
+3. Protected routes → authGuard redirects to /login if not authenticated
+4. User logs out → AuthService.logout() clears both localStorage and signal
+```
+
+**Token Storage Key:** Configured in `public/config.json` → `auth.tokenStorageKey`
 
 ---
 
@@ -198,49 +473,120 @@ this.apiService.get('/orders').pipe(
 
 ---
 
+---
+
 ## Development Workflows
 
 ### Starting Development
 
+**Terminal 1: Angular dev server**
 ```powershell
-# Terminal 1: Angular dev server
 npm start
-
-# Terminal 2 (optional): Mock API on :3000
-npm run mock-api
-
-# Or both concurrently
-npm run dev-with-mock
+# Navigate to http://localhost:4200/
+# Watches for file changes and rebuilds automatically
 ```
 
-Then enable mock in `public/config.json`: `"enableMockApi": true`.
+**Terminal 2 (optional): Mock API server**
+```powershell
+npm run mock-api
+# Starts json-server on http://localhost:3000
+# Watches db.json for changes
+```
+
+**Run Both Together:**
+```powershell
+npm run dev-with-mock
+# Uses concurrently to run both servers
+```
+
+**Enable Mock Routing:**
+Edit `public/config.json`:
+```json
+{
+  "features": {
+    "enableMockApi": true
+  }
+}
+```
 
 ### Running Tests
 
 ```powershell
-npm test              # Run all unit tests once
-npm test -- --watch  # Watch mode
-npm test -- --code-coverage
+npm test                          # Run all unit tests once
+npm test -- --watch              # Watch mode
+npm test -- --code-coverage      # With coverage report
+npm test -- --browsers=Chrome    # Specific browser
 ```
 
 **Key Test Files:**
 - `shared/validators/*.spec.ts` – Custom validator tests
 - `shared/forms/*.spec.ts` – Form component tests
 - `core/services/*.spec.ts` – Service tests (API, Auth, Logger)
+- `app.component.spec.ts` – Root shell tests
 
 ### Building for Production
 
+**Development Build:**
 ```powershell
-npm run build         # Outputs dist/
-node dist/.../server/server.mjs  # Run SSR server
+npm run build
+# Outputs dist/ directory
 ```
 
-### Docker
+**Production SSR Build & Run:**
+```powershell
+npm run build
+node dist/ng-myenterprise-template/server/server.mjs
+# SSR server runs on http://localhost:4000 (by default)
+```
+
+**Watch Mode (incremental builds):**
+```powershell
+npm run watch
+# Useful during development to see bundle size changes
+```
+
+### Docker Build & Run
 
 ```powershell
 docker build -t enterprise-angular .
 docker run -p 4000:4000 enterprise-angular
+# Runs SSR server in container
 ```
+
+### Common Development Commands Reference
+
+| Command | Purpose |
+|---------|---------|
+| `npm start` | Dev server with hot reload |
+| `npm run build` | Production build |
+| `npm run watch` | Incremental watch build |
+| `npm test` | Run tests once |
+| `npm run mock-api` | Start json-server on :3000 |
+| `npm run dev-with-mock` | Dev server + mock API together |
+| `npm run serve:ssr:ng-myenterprise-template` | Run production SSR build |
+
+### Troubleshooting Common Issues
+
+**Build fails with "Cannot find module":**
+- Run `npm install` to ensure dependencies are installed
+- Check that all imports use correct relative paths or barrel exports
+
+**Mock API not working:**
+- Ensure `npm run mock-api` is running in a separate terminal
+- Check `config.features.enableMockApi: true` in `public/config.json`
+- Verify requests are made to `/orders` not `/api/orders` (json-server has no /api prefix by default)
+
+**Tests fail with timeout:**
+- Increase timeout in test configuration
+- Check for unresolved promises or uncleared subscriptions
+- Use `fakeAsync` + `tick()` for time-dependent tests
+
+**Dark mode not applied at startup:**
+- Ensure `config.theme.darkMode: true` in `public/config.json`
+- Check browser console for config loading errors
+- Verify `_variables.scss` has dark mode CSS classes defined
+
+---
 
 ---
 
@@ -266,6 +612,10 @@ export const myFeatureRoutes: Route[] = [
   { 
     path: '', 
     loadComponent: () => import('./pages/my-feature-list/my-feature-list.page').then(m => m.MyFeatureListPage) 
+  },
+  { 
+    path: ':id', 
+    loadComponent: () => import('./pages/my-feature-detail/my-feature-detail.page').then(m => m.MyFeatureDetailPage) 
   }
 ];
 ```
@@ -273,43 +623,116 @@ export const myFeatureRoutes: Route[] = [
 ### Step 3: Add to Root Routes
 ```typescript
 // app.routes.ts
-{
-  path: 'my-feature',
-  loadChildren: () => import('./features/my-feature/my-feature.routes').then(m => m.myFeatureRoutes)
-}
+export const routes: Route[] = [
+  {
+    path: 'my-feature',
+    loadChildren: () => import('./features/my-feature/my-feature.routes').then(m => m.myFeatureRoutes)
+  },
+  // ... other routes
+];
 ```
 
 ### Step 4: Create Data Access Service
 ```typescript
+// features/my-feature/data-access/my-feature.service.ts
 @Injectable({ providedIn: 'root' })
 export class MyFeatureService {
-  constructor(private api: ApiService) {}
+  private api = inject(ApiService);
 
-  getItems() { return this.api.get('/my-items'); }
-  getItem(id: number) { return this.api.get(`/my-items/${id}`); }
+  getItems() { 
+    return this.api.get<MyItem[]>('/my-items'); 
+  }
+  
+  getItem(id: number) { 
+    return this.api.get<MyItem>(`/my-items/${id}`); 
+  }
+  
+  createItem(item: MyItem) {
+    return this.api.post<MyItem>('/my-items', item);
+  }
+  
+  updateItem(id: number, updates: Partial<MyItem>) {
+    return this.api.put<MyItem>(`/my-items/${id}`, updates);
+  }
+  
+  deleteItem(id: number) {
+    return this.api.delete(`/my-items/${id}`);
+  }
 }
 ```
 
 ### Step 5: Implement Component with Signals
 ```typescript
+// features/my-feature/pages/my-feature-list/my-feature-list.page.ts
 @Component({
+  selector: 'app-my-feature-list',
   standalone: true,
-  template: `...`
+  imports: [CommonModule, MatButtonModule, MatProgressSpinnerModule],
+  templateUrl: './my-feature-list.page.html',
+  styleUrls: ['./my-feature-list.page.scss']
 })
 export class MyFeatureListPage implements OnInit {
   private service = inject(MyFeatureService);
+  
   items = signal<MyItem[]>([]);
   loading = signal(false);
+  error = signal<string | null>(null);
 
   ngOnInit() {
+    this.loadItems();
+  }
+
+  loadItems(): void {
     this.loading.set(true);
     this.service.getItems().subscribe({
-      next: (data) => this.items.set(data),
-      error: () => this.loading.set(false),
+      next: (data) => {
+        this.items.set(data);
+        this.error.set(null);
+      },
+      error: (err) => {
+        this.error.set('Failed to load items');
+        console.error('Error loading items:', err);
+      },
       complete: () => this.loading.set(false)
     });
   }
 }
+```
+
+### Step 6: Add Mock Data (if using json-server)
+```json
+// db.json
+{
+  "my-items": [
+    { "id": 1, "name": "Item 1", "status": "active" },
+    { "id": 2, "name": "Item 2", "status": "inactive" }
+  ]
+}
+```
+
+### Step 7: Write Tests
+```typescript
+// features/my-feature/data-access/my-feature.service.spec.ts
+describe('MyFeatureService', () => {
+  let service: MyFeatureService;
+  let httpClient: HttpClient;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [MyFeatureService]
+    });
+    service = TestBed.inject(MyFeatureService);
+    httpClient = TestBed.inject(HttpClient);
+  });
+
+  it('should fetch items', (done) => {
+    spyOn(httpClient, 'get').and.returnValue(of([{ id: 1, name: 'Test' }]));
+    service.getItems().subscribe(items => {
+      expect(items.length).toBe(1);
+      done();
+    });
+  });
+});
 ```
 
 ---
