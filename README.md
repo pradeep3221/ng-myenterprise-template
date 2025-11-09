@@ -117,6 +117,24 @@ Scaffold a **complete Angular project structure** with modern best practices, fo
 - Linting: Yes
 - Documentation: Yes
 - Docker: Yes
+- Folder Structure: Yes
+- Environment Variables: Yes
+- Features: Yes
+- Error Handling: Yes
+- Logging: Yes
+- Analytics: Yes
+- Security: Yes
+- Performance: Yes
+- SEO: Yes
+- Accessibility: Yes
+- (Optional)Feature Flagging: Yes
+- (Optional) PWA: Yes
+- (Optional) Internationalization: Yes
+- (Optional) Kubernetes: Yes
+- (Optional) End-to-end Testing: Yes
+- (Optional) Storybook: Yes
+- (Optional) Prettier: Yes
+- (Optional) ESLint: Yes
 - (Optional) CI/CD: GitHub Actions for linting, testing, and building
 
 ---
